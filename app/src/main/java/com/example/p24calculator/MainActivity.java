@@ -4,6 +4,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.Bundle;
+import android.os.CountDownTimer;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AlertDialog;
@@ -25,7 +26,7 @@ import java.util.ArrayList;
 
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener, Serializable {
-    TextView editCalc, generated;
+    TextView editCalc, generated, txtTimer;
     Button clickedButton, backSpace, clear, quit, equal, generate, showAll, minus, difficulty;
 
     ArrayList<Operation> myArray;
@@ -36,6 +37,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     int rightAnswers = 0;
     int wrongAnswers = 0;
 
+    int elapsedTime = 0;
+    int totalTime = 0;
+
     public static String diff = "easy";
 
     int num1 = 0;
@@ -45,7 +49,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     Button[] listOfButtons = new Button[10];
     int listOfWidgets[] = { R.id.button0, R.id.button1, R.id.button2, R.id.button3, R.id.button4, R.id.button5, R.id.button6, R.id.button7, R.id.button8, R.id.button9 };
 
-
+    CountDownTimer myTimer;
 
     private ListView mDrawerList;
     private DrawerLayout mDrawerLayout;
@@ -238,6 +242,114 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         getSupportActionBar().setHomeButtonEnabled(true);
 
         initialize();
+
+        myTimer = new CountDownTimer(11000,1) {
+            @Override
+            public void onTick(long millisUntilFinished) {
+                txtTimer.setText(String.valueOf(millisUntilFinished/1000));
+            }
+
+            @Override
+            public void onFinish() {
+                myTimer.cancel();
+                elapsedTime = 10-Integer.parseInt(txtTimer.getText().toString());
+                if (calcMade && !TextUtils.isEmpty(editCalc.getText())) {
+                    txtTimer.setText("Timer stopped!");
+                    switch (operator) {
+                        case 0:
+                            int result = num1 + num2;
+                            if (result == Integer.parseInt(editCalc.getText().toString())) {
+                                rightAnswers++;
+                                Operation o1 = new Operation(ab, result, result, elapsedTime);
+                                myArray.add(o1);
+                                Toast.makeText(MainActivity.this, "You got it right!", Toast.LENGTH_LONG).show();
+                                generated.setText("You got it right! Click generate to generate a new math expression!");
+                                break;
+                            } else {
+                                wrongAnswers++;
+                                Operation o1 = new Operation(ab, result, Integer.parseInt(editCalc.getText().toString()), elapsedTime);
+                                myArray.add(o1);
+                                Toast.makeText(MainActivity.this, "How unfortunately! Try again!", Toast.LENGTH_LONG).show();
+                                generated.setText("How unfortunately! Try again! Click generate to generate a new math expression!");
+                            }
+                            break;
+                        case 1:
+                            result = num1 - num2;
+                            if (result == Integer.parseInt(editCalc.getText().toString())) {
+                                rightAnswers++;
+                                Operation o1 = new Operation(ab, result, result, elapsedTime);
+                                myArray.add(o1);
+                                Toast.makeText(MainActivity.this, "You got it right!", Toast.LENGTH_LONG).show();
+                                generated.setText("You got it right! Click generate to generate a new math expression!");
+                                break;
+                            } else {
+                                wrongAnswers++;
+                                Operation o1 = new Operation(ab, result, Integer.parseInt(editCalc.getText().toString()), elapsedTime);
+                                myArray.add(o1);
+                                Toast.makeText(MainActivity.this, "How unfortunately! Try again!", Toast.LENGTH_LONG).show();
+                                generated.setText("How unfortunately! Try again! Click generate to generate a new math expression!");
+                            }
+                            break;
+                        case 2:
+                            result = num1 * num2;
+                            if (result == Integer.parseInt(editCalc.getText().toString())) {
+                                rightAnswers++;
+                                Operation o1 = new Operation(ab, result, result, elapsedTime);
+                                myArray.add(o1);
+                                Toast.makeText(MainActivity.this, "You got it right!", Toast.LENGTH_LONG).show();
+                                generated.setText("You got it right! Click generate to generate a new math expression!");
+                                break;
+                            } else {
+                                wrongAnswers++;
+                                Operation o1 = new Operation(ab, result, Integer.parseInt(editCalc.getText().toString()), elapsedTime);
+                                myArray.add(o1);
+                                Toast.makeText(MainActivity.this, "How unfortunately! Try again!", Toast.LENGTH_LONG).show();
+                                generated.setText("How unfortunately! Try again! Click generate to generate a new math expression!");
+                            }
+                            break;
+                        default:
+                            break;
+                    }
+                }
+                else {
+                    switch (operator) {
+                        case 0: {
+                            int result = num1 + num2;
+                            wrongAnswers++;
+                            Operation o1 = new Operation(ab, result, 0, elapsedTime);
+                            myArray.add(o1);
+                            Toast.makeText(MainActivity.this, "Time up! How unfortunately! Try again!", Toast.LENGTH_LONG).show();
+                            txtTimer.setText("How unfortunately! Try again! Click generate to generate a new math expression!");
+                            break;
+                        }
+                        case 1: {
+                            int result = num1 - num2;
+                            wrongAnswers++;
+                            Operation o1 = new Operation(ab, result, 0, elapsedTime);
+                            myArray.add(o1);
+                            Toast.makeText(MainActivity.this, "Time up! How unfortunately! Try again!", Toast.LENGTH_LONG).show();
+                            txtTimer.setText("How unfortunately! Try again! Click generate to generate a new math expression!");
+                            break;
+                        }
+                        case 2: {
+                            int result = num1 * num2;
+                            wrongAnswers++;
+                            Operation o1 = new Operation(ab, result, 0, elapsedTime);
+                            myArray.add(o1);
+                            Toast.makeText(MainActivity.this, "Time up! How unfortunately! Try again!", Toast.LENGTH_LONG).show();
+                            txtTimer.setText("How unfortunately! Try again! Click generate to generate a new math expression!");
+                            }
+                            break;
+                        default:
+                            break;
+                    }
+                }
+                calcMade = false;
+                editCalc.setText(null);
+                generated.setText("Click generate to generate a new math expression!");
+
+            }
+        };
     }
 
     private void initialize() {
@@ -253,6 +365,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         showAll = findViewById(R.id.buttonShowAll); showAll.setOnClickListener(this);
         minus = findViewById(R.id.buttonMinus); minus.setOnClickListener(this);
         difficulty = findViewById(R.id.btnDifficulty); difficulty.setOnClickListener(this);
+
+        txtTimer = findViewById(R.id.txtTimer);
 
         generated.setText("Click on generate to begin!");
         for (int i=0;i<listOfWidgets.length;i++){
@@ -328,6 +442,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 break;
 
             case R.id.btnGenerate:
+                myTimer.start();
                 calcMade = true;
                 num1 = Operator.GenerateNum();
                 num2 = Operator.GenerateNum();
@@ -356,8 +471,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 generated.setText(ab.toString());
                 break;
 
-
-
             case R.id.buttonBack:
                 String txt = editCalc.getText().toString();
                 txt = txt.length() > 0 ? txt.substring(0, txt.length() - 1) : "";
@@ -374,77 +487,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 break;
 
             case R.id.buttonEqual:
-                if (calcMade && !TextUtils.isEmpty(editCalc.getText())) {
-                    switch (operator) {
-                        case 0:
-                            int result = num1 + num2;
-                            if (result == Integer.parseInt(editCalc.getText().toString())) {
-                                rightAnswers++;
-                                Operation o1 = new Operation(ab, result, result);
-                                myArray.add(o1);
-                                Toast.makeText(this, "You got it right!", Toast.LENGTH_LONG).show();
-                                generated.setText("You got it right! Click generate to generate a new math expression!");
-                                break;
-                            } else {
-                                wrongAnswers++;
-                                Operation o1 = new Operation(ab, result, Integer.parseInt(editCalc.getText().toString()));
-                                myArray.add(o1);
-                                Toast.makeText(this, "How unfortunately! Try again!", Toast.LENGTH_LONG).show();
-                                generated.setText("How unfortunately! Try again! Click generate to generate a new math expression!");
-                            }
-                            break;
-                        case 1:
-                            result = num1 - num2;
-                            if (result == Integer.parseInt(editCalc.getText().toString())) {
-                                rightAnswers++;
-                                Operation o1 = new Operation(ab, result, result);
-                                myArray.add(o1);
-                                Toast.makeText(this, "You got it right!", Toast.LENGTH_LONG).show();
-                                generated.setText("You got it right! Click generate to generate a new math expression!");
-                                break;
-                            } else {
-                                wrongAnswers++;
-                                Operation o1 = new Operation(ab, result, Integer.parseInt(editCalc.getText().toString()));
-                                myArray.add(o1);
-                                Toast.makeText(this, "How unfortunately! Try again!", Toast.LENGTH_LONG).show();
-                                generated.setText("How unfortunately! Try again! Click generate to generate a new math expression!");
-                            }
-                            break;
-                        case 2:
-                            result = num1 * num2;
-                            if (result == Integer.parseInt(editCalc.getText().toString())) {
-                                rightAnswers++;
-                                Operation o1 = new Operation(ab, result, result);
-                                myArray.add(o1);
-                                Toast.makeText(this, "You got it right!", Toast.LENGTH_LONG).show();
-                                generated.setText("You got it right! Click generate to generate a new math expression!");
-                                break;
-                            } else {
-                                wrongAnswers++;
-                                Operation o1 = new Operation(ab, result, Integer.parseInt(editCalc.getText().toString()));
-                                myArray.add(o1);
-                                Toast.makeText(this, "How unfortunately! Try again!", Toast.LENGTH_LONG).show();
-                                generated.setText("How unfortunately! Try again! Click generate to generate a new math expression!");
-                            }
-                            break;
-                        default:
-                            break;
-                    }
-                }
-                else {
-                    Toast.makeText(this, "Check entered data!", Toast.LENGTH_LONG).show();
-                    break;
-                }
-                calcMade = false;
-                editCalc.setText(null);
-                generated.setText("Click generate to generate a new math expression!");
+                myTimer.onFinish();
                 break;
 
             default:
                 break;
         }
-
-
     }
     @Override
     public void onBackPressed() {
